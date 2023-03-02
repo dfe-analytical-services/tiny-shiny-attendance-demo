@@ -115,18 +115,18 @@ server <- function(input, output, session) {
   live_attendance_data_ts <- reactive({
     if (input$geography_choice == "National") {
       dplyr::filter(
-        attendance_data, geographic_level == "National",
+        attendance_data_weekly, geographic_level == "National",
         school_type == input$school_choice
       )
     } else if (input$geography_choice == "Regional") {
       dplyr::filter(
-        attendance_data, geographic_level == "Regional",
+        attendance_data_weekly, geographic_level == "Regional",
         region_name == input$region_choice,
         school_type == input$school_choice
       )
     } else if (input$geography_choice == "Local authority") {
       dplyr::filter(
-        attendance_data, geographic_level == "Local authority",
+        attendance_data_weekly, geographic_level == "Local authority",
         region_name == input$region_choice,
         la_name == input$la_choice,
         school_type == input$school_choice
@@ -148,7 +148,7 @@ server <- function(input, output, session) {
       type = "scatter", mode = "lines+markers"
     ) %>%
       add_trace(
-        x = ~time_identifier,
+        x = ~week_commencing,
         y = ~overall_absence_perc,
         line = list(color = "black"),
         marker = list(color = "black"),
@@ -157,7 +157,7 @@ server <- function(input, output, session) {
         mode = "markers"
       ) %>%
       add_trace(
-        x = ~time_identifier,
+        x = ~week_commencing,
         y = ~authorised_absence_perc,
         line = list(color = "steelblue"),
         marker = list(color = "steelblue"),
@@ -166,7 +166,7 @@ server <- function(input, output, session) {
         mode = "markers"
       ) %>%
       add_trace(
-        x = ~time_identifier,
+        x = ~week_commencing,
         y = ~unauthorised_absence_perc,
         line = list(color = "orangered"),
         marker = list(color = "orangered"),
@@ -176,7 +176,7 @@ server <- function(input, output, session) {
       )
     
     ts_plot <- ts_plot %>% layout(
-      xaxis = list(title = "Week number", tickvals = ~time_identifier, zeroline = T, zerolinewidth = 2, zerolinecolor = "Grey", zerolinecolor = "#ffff", zerolinewidth = 2),
+      xaxis = list(title = "Week number", tickvals = ~week_commencing, zeroline = T, zerolinewidth = 2, zerolinecolor = "Grey", zerolinecolor = "#ffff", zerolinewidth = 2),
       yaxis = list(rangemode = "tozero", title = "Absence rate (%)", zeroline = T, zerolinewidth = 2, zerolinecolor = "Grey", zerolinecolor = "#ffff", zerolinewidth = 2),
       hovermode = "x unified",
       legend = list(
@@ -192,7 +192,10 @@ server <- function(input, output, session) {
     
     ts_plot <- ts_plot %>% layout(
       xaxis = list(
-        tickmode = "linear"
+        tickmode = "linear",
+        tick0 = "2022-09-12",
+        # dtick = "M1"
+        dtick = 86400000 * 14
       )
     )
   })
