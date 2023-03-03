@@ -23,14 +23,14 @@ tidy_code_function <- function() {
   return(script_changes)
 }
 
-attendance_data <- read.csv(file = "ees_weekly_data_.csv") %>%
+attendance_data_weekly <- read.csv(file = "ees_weekly_data_.csv") %>%
   as.data.frame() %>%
   mutate(time_identifier = str_remove_all(time_identifier, "Week ")) %>% 
   mutate_at(c(1:2, 12:63), as.numeric) %>%
-  filter(time_period == '2022')
+  mutate(week_commencing = as.Date(paste(time_period, time_identifier, 1, sep="-"), "%Y-%U-%u"))
 
 # Add geog lookup
-geog_lookup <- attendance_data %>%
+geog_lookup <- attendance_data_weekly %>%
   dplyr::select(geographic_level, region_name, la_name) %>%
   unique() %>%
   arrange(region_name, la_name)
@@ -40,7 +40,7 @@ geog_levels <- geog_lookup %>%
   unique() %>%
   as.data.table()
 
-school_type_lookup <- attendance_data %>%
+school_type_lookup <- attendance_data_weekly %>%
   dplyr::select(geographic_level, school_type) %>%
   unique() %>%
   arrange(geographic_level, school_type)
